@@ -1,0 +1,5 @@
+import { bootPWA, load, state, setHTML, installRealtime, empty } from './common.js';
+import { endpoints } from './api.js';
+bootPWA();
+async function render(){ await load(['orders']); setHTML(`<section class="kds"><header class="hero"><h1>キッチンディスプレイ</h1><input placeholder="検索"><button class="btn">フィルター</button><button class="btn">統計</button></header><section class="cards">${state.orders.map(o=>`<article class="order-card"><h2>注文 #${o.id}</h2><p>テーブル ${o.tableNumber||''}</p><p class="timer">${o.createdAt||''}</p>${(o.items||[]).map(i=>`<div class="line"><b>${i.name}</b><span>${i.qty}</span></div>`).join('')}<div class="toolbar">${['調理開始','調理中','調理完了','提供済み'].map(s=>`<button class="btn" data-id="${o.id}" data-status="${s}">${s}</button>`).join('')}</div></article>`).join('')||empty('注文')}</section></section>`); document.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>endpoints.createOrder({kdsStatus:b.dataset.status, orderId:b.dataset.id})); }
+render(); installRealtime(['/ws/orders','/ws/kds'], render);
